@@ -1,4 +1,5 @@
 import subprocess
+
 from guardiand.services.service import Service
 from guardiand.logger.logger import Logger
 
@@ -6,8 +7,10 @@ class GuardianDaemon(object):
     """
     """
 
+    logger = Logger('daemon')
+
     def __init__(self):
-        self.logger = Logger('daemon')
+        pass
 
     def run(self):
         """ Initializes the new GuardianDaemon.
