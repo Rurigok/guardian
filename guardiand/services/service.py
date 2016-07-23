@@ -1,9 +1,14 @@
+import queue
 import re
+from multiprocessing import Process
 
-import guardiand.actions.firewalld
+from guardiand.actions.firewalld import FirewalldActions
+from guardiand.actions.iptables import IPTablesActions
 from guardiand.logger.logger import Logger
 
-class Service(object):
+class Service(Process):
+    """
+    """
 
     def __init__(self, name, regex):
         """ Constructs a new Service
@@ -19,10 +24,13 @@ class Service(object):
         Returns:
             n/a
         """
-        self.logger = Logger(name + ' service')
-        self.logger.info('starting service...')
+        # call super constructor
+        Process.__init__(self, target=self.consume_lines)
 
-        self.queue = list()
+        self.logger = Logger(name + ' service')
+        self.logger.info('starting service process...')
+
+        self.queue = queue.Queue()
         self.regex = re.compile(regex)
         self.logger.info("compiled regex: '{}'".format(regex))
 
@@ -39,12 +47,9 @@ class Service(object):
         Returns:
             true if match was found, false otherwise
         """
-        result = re.search(regex, line)
+        #self.logger.info('Checking line: ' + line)
 
-        if result:
-            self.queue_line(line)
-
-        return result
+        return self.regex.search(line)
 
     def queue_line(self, line):
         """ Adds the given line to this service's processing queue
@@ -52,4 +57,18 @@ class Service(object):
         Params:
             line Line to add to processing queue
         """
-        self.queue.append(line)
+        self.logger.info('Queued: ' + line)
+        self.queue.put(line)
+
+    def consume_lines(self):
+        """
+        """
+        consuming = True
+        while consuming:
+            line = self.queue.get()
+            self.process_line(line)
+
+    def process_line(self, line):
+        """
+        """
+        self.logger.info('Processing: ' + line)

@@ -10,7 +10,7 @@ class GuardianDaemon(object):
     logger = Logger('daemon')
 
     def __init__(self):
-        pass
+        self.services = []
 
     def run(self):
         """ Initializes the new GuardianDaemon.
@@ -29,14 +29,14 @@ class GuardianDaemon(object):
             exit()
 
         # Tail the specified log file
-        filename = '/var/log/secure'
-        f = subprocess.Popen(['tail', '-F', filename],
-            stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        filename = '/var/log/auth.log'
+        tail = subprocess.Popen(['tail', '--follow', filename],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+        listening = True
         # Main event loop: reads lines from the specified log file
-        while True:
-            line = f.stdout.readline()
-            self.parse_line(line)
+        while listening:
+            self.parse_line(tail.stdout.readline())
 
     def initialize_services(self):
         """ Detects services and initializes them as needed
@@ -48,18 +48,22 @@ class GuardianDaemon(object):
 
         # TODO: add functionality to actually detect/init services
         # hard-code sshd service to be automatically created
-        services.append(Service("ssh", "sshd"))
+        services.append(Service('ssh', 'sshd'))
+        services.append(Service('sudo', 'sudo'))
+
+        for service in services:
+            service.daemon = True
+            service.start()
 
         return services
 
     def parse_line(self, line):
         """
         """
+        line = str(line)
 
         # Find a service to accept and process the given line
         for service in self.services:
             if service.match_line(line):
-                return
-
-        # Didn't find a service to process the line, let's just print it
-        print("No service found matching:: " + line)
+                service.queue_line(line)
+                break
