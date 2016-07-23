@@ -51,9 +51,8 @@ class GuardianDaemon(object):
         services.append(Service('ssh', 'sshd'))
         services.append(Service('sudo', 'sudo'))
 
-        for service in services:
-            service.daemon = True
-            service.start()
+        #for service in services:
+        #    service.start()
 
         return services
 
@@ -65,5 +64,5 @@ class GuardianDaemon(object):
         # Find a service to accept and process the given line
         for service in self.services:
             if service.match_line(line):
-                service.queue_line(line)
+                service.process_line(line)
                 break

@@ -1,12 +1,11 @@
 import queue
 import re
-from multiprocessing import Process
 
 from guardiand.actions.firewalld import FirewalldActions
 from guardiand.actions.iptables import IPTablesActions
 from guardiand.logger.logger import Logger
 
-class Service(Process):
+class Service(object):
     """
     """
 
@@ -24,9 +23,6 @@ class Service(Process):
         Returns:
             n/a
         """
-        # call super constructor
-        Process.__init__(self, target=self.consume_lines)
-
         self.logger = Logger(name + ' service')
         self.logger.info('starting service process...')
 
@@ -59,14 +55,6 @@ class Service(Process):
         """
         self.logger.info('Queued: ' + line)
         self.queue.put(line)
-
-    def consume_lines(self):
-        """
-        """
-        consuming = True
-        while consuming:
-            line = self.queue.get()
-            self.process_line(line)
 
     def process_line(self, line):
         """
