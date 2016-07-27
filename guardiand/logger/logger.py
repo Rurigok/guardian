@@ -56,6 +56,7 @@ class Logger(object):
             level Severity of the message
             message The message to be logged
         """
+        # TODO: make this actually log like a real unix program
         print('{:%Y-%m-%d %H:%M:%S} {} guardiand[{}] {}: {}'
               .format(datetime.now(), self.hostname,
                       self.module, level, message))

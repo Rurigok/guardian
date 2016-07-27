@@ -28,6 +28,7 @@ class GuardianDaemon(object):
             self.logger.fatal('Uh oh, no services were found! Exiting...')
             exit()
 
+        # TODO: allow reading of lines from syslog/rsyslog/journald
         # Tail the specified log file
         filename = '/var/log/auth.log'
         tail = subprocess.Popen(['tail', '--follow', filename],
@@ -47,19 +48,16 @@ class GuardianDaemon(object):
         services = list()
 
         # TODO: add functionality to actually detect/init services
-        # hard-code sshd service to be automatically created
+        # hard-code ssh and sudo services for testing
         services.append(Service('ssh', 'sshd'))
         services.append(Service('sudo', 'sudo'))
-
-        #for service in services:
-        #    service.start()
 
         return services
 
     def parse_line(self, line):
         """
         """
-        line = str(line)
+        line = line.decode('utf-8')
 
         # Find a service to accept and process the given line
         for service in self.services:

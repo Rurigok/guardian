@@ -1,4 +1,3 @@
-import queue
 import re
 
 from guardiand.actions.firewalld import FirewalldActions
@@ -26,7 +25,6 @@ class Service(object):
         self.logger = Logger(name + ' service')
         self.logger.info('starting service process...')
 
-        self.queue = queue.Queue()
         self.regex = re.compile(regex)
         self.logger.info("compiled regex: '{}'".format(regex))
 
@@ -44,19 +42,9 @@ class Service(object):
             true if match was found, false otherwise
         """
         #self.logger.info('Checking line: ' + line)
-
         return self.regex.search(line)
-
-    def queue_line(self, line):
-        """ Adds the given line to this service's processing queue
-
-        Params:
-            line Line to add to processing queue
-        """
-        self.logger.info('Queued: ' + line)
-        self.queue.put(line)
 
     def process_line(self, line):
         """
         """
-        self.logger.info('Processing: ' + line)
+        # TODO: process the line
