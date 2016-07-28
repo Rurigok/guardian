@@ -1,7 +1,5 @@
 # guardian
 
-## Overview
-
 Guardian is a simple experimental intrusion detection and prevention system,
 intended to protect authenticated services such as ssh.
 
