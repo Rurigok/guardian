@@ -1,9 +1,12 @@
 import re
 
-import guardiand.actions.firewalld
+from guardiand.actions.firewalld import FirewalldActions
+from guardiand.actions.iptables import IPTablesActions
 from guardiand.logger.logger import Logger
 
 class Service(object):
+    """
+    """
 
     def __init__(self, name, regex):
         """ Constructs a new Service
@@ -20,9 +23,8 @@ class Service(object):
             n/a
         """
         self.logger = Logger(name + ' service')
-        self.logger.info('starting service...')
+        self.logger.info('starting service process...')
 
-        self.queue = list()
         self.regex = re.compile(regex)
         self.logger.info("compiled regex: '{}'".format(regex))
 
@@ -39,17 +41,10 @@ class Service(object):
         Returns:
             true if match was found, false otherwise
         """
-        result = re.search(regex, line)
+        #self.logger.info('Checking line: ' + line)
+        return self.regex.search(line)
 
-        if result:
-            self.queue_line(line)
-
-        return result
-
-    def queue_line(self, line):
-        """ Adds the given line to this service's processing queue
-
-        Params:
-            line Line to add to processing queue
+    def process_line(self, line):
         """
-        self.queue.append(line)
+        """
+        # TODO: process the line
