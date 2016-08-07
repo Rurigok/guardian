@@ -2,9 +2,10 @@
 from guardiand.daemon import GuardianDaemon
 
 def main():
-
-    d = GuardianDaemon()
-    d.run()
+    """ Runs guardiand """
+    # TODO: add argument parser
+    daemon = GuardianDaemon()
+    daemon.run()
 
 if __name__ == '__main__':
     main()

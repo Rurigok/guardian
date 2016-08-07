@@ -1,5 +1,7 @@
 import subprocess
 
+from pprint import pprint
+
 from guardiand.services.service import Service
 from guardiand.logger.logger import Logger
 
@@ -28,10 +30,23 @@ class GuardianDaemon(object):
             self.logger.fatal('Uh oh, no services were found! Exiting...')
             exit()
 
+        ######################################################
+        # Hook to load in test data
+        self.logger.info('********* Loading test data!!')
+        with open('secure') as f:
+            for line in f.readlines():
+                self.parse_line(line)
+
+        # Print our bags of words from our models
+        for s in self.services:
+            self.logger.info('printing bags of words')
+            pprint(s.model.bag_of_words)
+        ######################################################
+
         # TODO: allow reading of lines from syslog/rsyslog/journald
         # Tail the specified log file
         filename = '/var/log/auth.log'
-        tail = subprocess.Popen(['tail', '--follow', filename],
+        tail = subprocess.Popen(['tail', '--follow', filename],\
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         listening = True
@@ -57,9 +72,12 @@ class GuardianDaemon(object):
     def parse_line(self, line):
         """
         """
-        line = line.decode('utf-8')
+        if not type(line) is str:
+            line = line.decode('utf-8')
 
         # Find a service to accept and process the given line
+        # TODO: could change search order of services based on their num of entries.
+        # i.e. if sshd has 10k entries and smtp has 100, make sure sshd is checked for a match first.
         for service in self.services:
             if service.match_line(line):
                 service.process_line(line)

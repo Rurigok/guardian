@@ -1,8 +1,11 @@
 import re
 
+from guardiand.model import model
+
 from guardiand.actions.firewalld import FirewalldActions
 from guardiand.actions.iptables import IPTablesActions
 from guardiand.logger.logger import Logger
+from guardiand.services.entry import Entry
 
 class Service(object):
     """
@@ -20,13 +23,19 @@ class Service(object):
                   parsed and handled.
 
         Returns:
-            n/a
+            a new Service
         """
         self.logger = Logger(name + ' service')
         self.logger.info('starting service process...')
 
         self.regex = re.compile(regex)
         self.logger.info("compiled regex: '{}'".format(regex))
+
+        # Attempt to find an existing model for this service, otherwise
+        # create a new one.
+        self.model = model.find_model(name)
+        if not self.model:
+            self.model = model.create_model(name)
 
     def match_line(self, line):
         """ Matches the line to this service's regex
@@ -45,6 +54,24 @@ class Service(object):
         return self.regex.search(line)
 
     def process_line(self, line):
+        """ Sends the log entry to the classifier
+
+        This method asks the classifier if the given line is malicious, and if
+        so will take the appropriate action.
+
+        Params:
+            line The line to check
+
+        Returns:
+            n/a
         """
-        """
-        # TODO: process the line
+        self.logger.info('processing entry...')
+        entry = Entry(line)
+        # First, make a decision based on our existing data
+        if self.model.is_malicious(entry):
+            self.logger.info('possible attack detected!!')
+        else:
+            self.logger.info('entry classified as non-malicious.')
+        # Then, add that data to our model
+        self.model.add_entry(entry)
+        self.logger.info('added entry to model')
